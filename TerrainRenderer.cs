@@ -9,6 +9,7 @@ public class TerrainRenderer(Game game) : DrawableGameComponent(game)
 {
 	private int _mapWidth;
 	private int _mapHeight;
+	private float _maxHeight = 0;
 	private float[,] _heightmapData;
 
 	private VertexBuffer _vertexBuffer;
@@ -38,7 +39,7 @@ public class TerrainRenderer(Game game) : DrawableGameComponent(game)
 	{
 		_angle += 0.01f;
 		_view = Matrix.CreateLookAt(
-			new Vector3(10 * (float)Math.Sin(_angle), 3, 10 * (float)Math.Cos(_angle)),
+			new Vector3(10 * (float)Math.Sin(_angle), 7, 10 * (float)Math.Cos(_angle)),
 			new Vector3(0, 0, 0),
 			Vector3.UnitY);
 	}
@@ -93,6 +94,10 @@ public class TerrainRenderer(Game game) : DrawableGameComponent(game)
 					if (float.TryParse(lineData[x], out float height))
 					{
 						_heightmapData[y, x] = height;
+						if (height > _maxHeight)
+						{
+							_maxHeight = height;
+						}
 					}
 
 					else
@@ -113,12 +118,16 @@ public class TerrainRenderer(Game game) : DrawableGameComponent(game)
 	{
 		VertexPositionColor[] vertices = new VertexPositionColor[_mapHeight * _mapWidth];
 
+		// TODO: In the future, we want these to be fixed numbers
+		float centerX = (_mapWidth - 1) / 2f;
+		float centerY = (_mapHeight - 1) / 2f;
+
 		for (int y = 0; y < _mapHeight; y++)
 		{
 			for (int x = 0; x < _mapWidth; x++)
 			{
 				float height = _heightmapData[y, x];
-				vertices[y * _mapHeight + x] = new VertexPositionColor(new Vector3(x, height, y), Color.Green);
+				vertices[y * _mapWidth + x] = new VertexPositionColor(new Vector3(x - centerX, height, y - centerY), new Color(0, 0.2f + (height / _maxHeight), 0));
 			}
 		}
 
